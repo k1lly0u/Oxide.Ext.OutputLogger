@@ -19,7 +19,7 @@ namespace Oxide.Ext.OutputLogger
 
         public override void Load()
         {
-            Interface.Oxide.RootLogger.AddLogger(new OutputLogger());
+            outputLogger = new OutputLogger();
         }
 
         public override void OnModLoad()
@@ -31,6 +31,8 @@ namespace Oxide.Ext.OutputLogger
         }
 
         public override bool SupportsReloading => false;
+
+        private OutputLogger outputLogger;
 
         internal static Assembly Assembly = Assembly.GetExecutingAssembly();
 

@@ -1,15 +1,14 @@
 ﻿using System;
 using System.IO;
-using Oxide.Core;
 using UnityEngine;
 
 namespace Oxide.Ext.OutputLogger
 {
-    public class OutputLogger : Core.Logging.Logger
+    public class OutputLogger
     {
         private string filePath;
 
-        public OutputLogger() : base(true)
+        public OutputLogger()
         {
             string directory = Directory.GetParent(Application.dataPath).FullName;
 
@@ -28,64 +27,19 @@ namespace Oxide.Ext.OutputLogger
 
         private void HandleOutputMessage(string message, string stackTrace, UnityEngine.LogType logType)
         {
-            Core.Logging.LogType coreType = Core.Logging.LogType.Info;
-
-            switch (logType)
-            {
-                case LogType.Error:
-                    coreType = Core.Logging.LogType.Error;
-                    break;                
-                case LogType.Warning:
-                    coreType = Core.Logging.LogType.Warning;
-                    break;
-                case LogType.Exception:
-                    coreType = Core.Logging.LogType.Error;
-                    break;
-                case LogType.Assert:
-                case LogType.Log:
-                default:
-                    coreType = Core.Logging.LogType.Info;
-                    break;
-            }
-
-            this.Write(coreType, string.Concat(message, Environment.NewLine, stackTrace));
-        }
-
-        public override void HandleMessage(string message, string stackTrace, Oxide.Core.Logging.LogType logType)
-        {           
+            if (string.IsNullOrEmpty(message))
+                return;
+           
             this.Write(logType, string.Concat(message, Environment.NewLine, stackTrace));
         }
-                
-        public override void WriteException(string message, Exception ex)
-        {
-            string formatted = ExceptionHandler.FormatException(ex);
-            if (formatted != null)
-            {
-                this.Write(Core.Logging.LogType.Error, $"{message}{Environment.NewLine}{formatted}");
-                return;
-            }
-
-            Exception outerEx = ex;
-            while (ex.InnerException != null)
-            {
-                ex = ex.InnerException;
-            }
-
-            if (outerEx.GetType() != ex.GetType())
-            {
-                this.Write(Core.Logging.LogType.Error, "ExType: {0}", outerEx.GetType().Name);
-            }
-
-            this.Write(Core.Logging.LogType.Error, $"{message} ({ex.GetType().Name}: {ex.Message})\n{ex.StackTrace}");
-        }
-
-        public override void Write(Core.Logging.LogType type, string format, params object[] args)
+       
+        public void Write(LogType type, string format, params object[] args)
         {
             this.Write(this.CreateLog(type, format, args));
         }
 
 
-        protected Log CreateLog(Core.Logging.LogType type, string format, object[] args)
+        protected Log CreateLog(LogType type, string format, object[] args)
         {
             Log logMessage = new Log();
 
